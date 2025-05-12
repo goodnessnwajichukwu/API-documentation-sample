@@ -1,0 +1,33 @@
+https://api.weatherapp.com/v1
+Authorization: Bearer <your-api-key>
+GET /weather/current?city=London&country=GB
+{
+  "location": {
+    "city": "London",
+    "country": "GB"
+  },
+  "temperature": {
+    "current": 15.5,
+    "unit": "Celsius"
+  },
+  "conditions": "Clear",
+  "humidity": 65,
+  "wind_speed": 5.4
+}
+GET /weather/forecast/hourly?city=New York&country=US&hours=12
+{
+  "location": {
+    "city": "New York",
+    "country": "US"
+  },
+  "forecast": [
+    {
+      "hour": 1,
+      "temperature": 14.0,
+      "conditions": "Clear",
+      "humidity": 63,
+      "wind_speed": 6.2
+    },
+    ...
+  ]
+}
