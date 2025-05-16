@@ -1,0 +1,71 @@
+from flask import Flask, jsonify, request
+from uuid import uuid4
+
+app = Flask(__name__)
+
+# In-memory database
+books = []
+
+# Authentication token for demo
+AUTH_TOKEN = "mysecrettoken"
+
+# Middleware to check token
+@app.before_request
+def check_authentication():
+    if request.endpoint == 'index':
+        return
+    token = request.headers.get('Authorization')
+    if token != f"Bearer {AUTH_TOKEN}":
+        return jsonify({"error": "Unauthorized"}), 401
+
+@app.route('/')
+def index():
+    return jsonify({"message": "Welcome to the Book Library API!"})
+
+# Get all books
+@app.route('/books', methods=['GET'])
+def get_books():
+    return jsonify(books)
+
+# Add a new book
+@app.route('/books', methods=['POST'])
+def add_book():
+    data = request.get_json()
+    if not data.get('title') or not data.get('author'):
+        return jsonify({"error": "Missing title or author"}), 400
+    book = {
+        "id": str(uuid4()),
+        "title": data['title'],
+        "author": data['author']
+    }
+    books.append(book)
+    return jsonify(book), 201
+
+# Get a specific book
+@app.route('/books/<book_id>', methods=['GET'])
+def get_book(book_id):
+    for book in books:
+        if book['id'] == book_id:
+            return jsonify(book)
+    return jsonify({"error": "Book not found"}), 404
+
+# Update a book
+@app.route('/books/<book_id>', methods=['PUT'])
+def update_book(book_id):
+    data = request.get_json()
+    for book in books:
+        if book['id'] == book_id:
+            book['title'] = data.get('title', book['title'])
+            book['author'] = data.get('author', book['author'])
+            return jsonify(book)
+    return jsonify({"error": "Book not found"}), 404
+
+# Delete a book
+@app.route('/books/<book_id>', methods=['DELETE'])
+def delete_book(book_id):
+    global books
+    books = [book for book in books if book['id'] != book_id]
+    return jsonify({"message": "Book deleted"}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
